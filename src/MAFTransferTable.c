@@ -1,4 +1,4 @@
-/*	MAFTransferTable.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,14 +15,36 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
+
+/**	@file MAFTransferTable.c
+ * @ingroup dataInitialisers
+ *
+ * @brief Mass Air Flow Transfer Table
+ *
+ * This file exists solely to contain the Mass Air Flow transfer function
+ * lookup table.
+ *
+ * @author Fred Cooke
+ */
+
+
 #include "inc/freeEMS.h"
 
+
+/** @brief Mass Air Flow Transfer Table
+ *
+ * Using this table it is possible to accurately and quickly convert
+ * a raw ADC reading to a measured mass air flow value.
+ *
+ * @author Fred Cooke
+ */
 const volatile unsigned short MAFTransferTable[1024] LOOKUPD = {
 	3,		3,		3,		3,		4,		4,		4,		4,		5,		5,		5,		5,		6,		6,		6,		6,
 	7,		7,		7,		8,		8,		8,		9,		9,		10,		10,		10,		11,		11,		12,		12,		13,

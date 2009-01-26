@@ -1,6 +1,4 @@
-/*	flashBurn.h
-
-	Copyright 2008 Sean Keys
+/*	Copyright 2008 Sean Keys
 
 	This file is part of the FreeEMS project.
 
@@ -15,25 +13,31 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
+
+/** @file flashBurn.h
+ * @ingroup allHeaders
+ *
+ * @brief C header for assembly flash function
+ *
+ * Because we need to call the assembly flash burning function from C code an
+ * extern function declaration is required to allow successful compilation.
+ */
+
+
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
-
 #ifndef FLASHBURN_H_SEEN
 #define FLASHBURN_H_SEEN
 
-#ifdef FLASHBURN_S
-#define EXTERN
-#else
-#define EXTERN extern
-#endif
 
-EXTERN void StackBurner();
+extern void StackBurner();
 
 
 #else

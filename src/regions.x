@@ -1,4 +1,4 @@
-/*	regions.x
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,17 +15,30 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
-/* FreeEMS memory regions/banks/sections definition.  */
 
-/* A description of what some of this means can be found at the following URL	*/
-/* http://www.gnu.org/software/m68hc11/m68hc11_binutils.html					*/
-/* http://m68hc11.serveftp.org/wiki/index.php/FAQ:Link							*/
+/**	@file regions.x
+ *
+ * @brief Region mapping linker script
+ *
+ * Code section to memory region mapping definition file for inclusion
+ * into the linker script. This file provides rules which map pieces of
+ * code and data from named sections into specific named memory regions.
+ * See memory.x and hc9s12xdp512elfb.x for more information.
+ *
+ * A description of what some of this means can be found at the following URLs:
+ * - http://www.gnu.org/software/m68hc11/m68hc11_binutils.html
+ * - http://m68hc11.serveftp.org/wiki/index.php/FAQ:Link
+ *
+ * @cond regionsscript
+ */
+
 
 SECTIONS
 {
@@ -312,3 +325,6 @@ SECTIONS
     *(.ppageF7)
   }  > ppageF7
 }
+
+
+/** @endcond */

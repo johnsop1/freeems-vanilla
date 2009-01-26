@@ -1,6 +1,6 @@
-/*	blockDetailsLookup.h
+/*	FreeEMS - the open source engine management system
 
-	Copyright 2008 Fred Cooke
+	Copyright 2008, 2009 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,16 +15,30 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/** @file blockDetailsLookup.h
+ * @ingroup allHeaders
+ */
+
 
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
 #ifndef FILE_BLOCK_DETAILS_LOOKUP_H_SEEN
 #define FILE_BLOCK_DETAILS_LOOKUP_H_SEEN
+
+
+#ifdef EXTERN
+#warning "EXTERN already defined by another header, please sort it out!"
+#undef EXTERN /* If fail on warning is off, remove the definition such that we can redefine correctly. */
+#endif
+
 
 #ifdef BLOCK_DETAILS_LOOKUP_C
 #define EXTERN
@@ -32,7 +46,8 @@
 #define EXTERN extern
 #endif
 
-EXTERN void lookupBlockDetails(unsigned short, blockDetails*) FPAGE_FE;
+
+EXTERN unsigned short lookupBlockDetails(unsigned short, blockDetails*) FPAGE_FE;
 
 
 /* Memory block ID section */
@@ -115,8 +130,17 @@ EXTERN void lookupBlockDetails(unsigned short, blockDetails*) FPAGE_FE;
 
 
 /* Individual small chunks of fixed config blocks */
-
-// TODO no point till we can burn down small pieces via buffer.
+/* Fixed conf 1 */
+#define engineSettingsLocationID					2000
+#define serialSettingsLocationID					2001
+#define tachoSettingsLocationID						2002
+#define coreSettingsALocationID						2003
+#define userTextFieldLocationID						2004
+/* Fixed conf 2 */
+#define sensorRangesLocationID						3000
+#define sensorPresetsLocationID						3001
+#define sensorSettingsLocationID					3002
+#define userTextField2LocationID					3003
 
 
 #undef EXTERN

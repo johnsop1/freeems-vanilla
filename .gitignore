@@ -1,3 +1,10 @@
-docs/doxygen-html/
 doxygen.output
+docs/doxygen-html/
+src/firmware/
+src/output/
+src/preprocessedc/
+src/objects/
+src/debug/
+src/assembly/*.s
+!src/assembly/flashBurn.s
 

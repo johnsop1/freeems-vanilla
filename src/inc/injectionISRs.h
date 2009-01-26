@@ -1,6 +1,4 @@
-/*	injectionISRs.h
-
-	Copyright 2008 Fred Cooke
+/*	Copyright 2008 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,16 +13,30 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/**	@file injectionISRs.h
+ * @ingroup allHeaders
+ */
+
 
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
 #ifndef FILE_INJECTION_ISRS_H_SEEN
 #define FILE_INJECTION_ISRS_H_SEEN
+
+
+#ifdef EXTERN
+#warning "EXTERN already defined by another header, please sort it out!"
+#undef EXTERN /* If fail on warning is off, remove the definition such that we can redefine correctly. */
+#endif
+
 
 #ifdef INJECTIONISRS_C
 #define EXTERN
@@ -32,17 +44,18 @@
 #define EXTERN extern
 #endif
 
+
 /* Staged injector channel bit masks and registers */
 
 /* Use port K for staged injector output */
 #define STAGEDPORT PORTK
 
 /* Masks for setting and checking stagedOn status var and turning the channel on */
-#define STAGED1ON BIT0 
-#define STAGED2ON BIT1 
-#define STAGED3ON BIT2 
-#define STAGED4ON BIT3 
-#define STAGED5ON BIT4 
+#define STAGED1ON BIT0
+#define STAGED2ON BIT1
+#define STAGED3ON BIT2
+#define STAGED4ON BIT3
+#define STAGED5ON BIT4
 #define STAGED6ON BIT5
 
 /* Masks for unsetting stagedOn status var and turning the channel off */
@@ -56,7 +69,9 @@
 /* Internal use to decide if staged is actually required or not based on pulsewidth etc */
 unsigned char stagedRequired;
 
+
 #undef EXTERN
+
 
 #else
 	/* let us know if we are being untidy with headers */

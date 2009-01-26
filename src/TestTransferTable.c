@@ -1,4 +1,4 @@
-/*	TestTransferTable.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,13 +15,28 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
+
+/** @file TestTransferTable.c
+ * @ingroup dataInitialisers
+ * @ingroup testing
+ *
+ * @brief Test data for comms
+ *
+ * An array of bytes from 0 - 255 repeated 8 times for testing serial comms.
+ *
+ * @author Fred Cooke
+ */
+
+
 #include "inc/freeEMS.h"
+
 
 const volatile unsigned char TestTransferTable[2048] LOOKUPD = {
  0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,

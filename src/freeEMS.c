@@ -1,6 +1,4 @@
-/*	freeEMS.c
-
-	Copyright 2008 Fred Cooke
+/*	Copyright 2008 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,18 +13,32 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
 
-#define MAIN_OR_GLOBALS
+/**	@file freeEMS.c
+ *
+ * @brief Here purely for structure
+ *
+ * This file creates the symbols for all of the variables. It is
+ * separated to clarify how much memory is actually being used by
+ * various parts of the program. This is required because the RX/TX
+ * buffers and main paged RAM unions show up as occupied data space
+ * even though they are actually in RAM and not flash.
+ *
+ * @author Fred Cooke
+ */
+
+
+#define FREEEMS_C
 #include "inc/freeEMS.h"
 
-/* This file creates the symbols for all of the variables. It is	*/
-/* separated to clarify how much memory is actually being used by	*/
-/* various parts of the program.									*/
 
-/* &&&&&&&&&&&&& THIS FILE IS SUPPOSED TO BE EMPTY!!! &&&&&&&&&&&&& */
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */
+/* &&&&&&&&&&& THIS FILE IS SUPPOSED TO HAVE NO CODE!!! &&&&&&&&&&& */
+/* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& */

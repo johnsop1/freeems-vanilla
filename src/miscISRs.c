@@ -1,4 +1,4 @@
-/*	miscISRs.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,22 +15,49 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
+
+/** @file miscISRs.c
+ * @ingroup interruptHandlers
+ *
+ * @brief Miscellaneous Interrupt Handlers
+ *
+ * Various non-descript interrupt handlers that don't really fit anywhere else
+ * and aren't big enough to live on their own just yet.
+ *
+ * @author Fred Cooke
+ */
+
+
 #include "inc/freeEMS.h"
 #include "inc/interrupts.h"
-#include "inc/miscISRs.h"
 
-/* Unimplemented interrupt service routine */
+
+/** @brief Unimplemented Interrupt Handler
+ *
+ * Unimplemented interrupt service routine for calls  we weren't expecting.
+ * Currently this simply counts bad calls like any other event type.
+ *
+ * @author Fred Cooke
+ */
 void UISR(void){
 	/* Increment the unimplemented ISR execution counter */
 	Counters.callsToUISRs++;
 }
 
+
+/** @brief Port P pins ISR
+ *
+ * Interrupt handler for edge events on port P pins. Not currently used.
+ *
+ * @author Fred Cooke
+ */
 void PortPISR(void){
 	/* Clear all port P flags (we only want one at a time) */
 	PIFP = ONES;
@@ -38,7 +65,13 @@ void PortPISR(void){
 	Counters.callsToUISRs++;
 }			/* Port P interrupt service routine */
 
-/* Port J interrupt service routine */
+
+/** @brief Port J pins ISR
+ *
+ * Interrupt handler for edge events on port J pins. Not currently used.
+ *
+ * @author Fred Cooke
+ */
 void PortJISR(void){
 	/* Clear all port H flags (we only want one at a time) */
 	PIFJ = ONES;
@@ -46,7 +79,13 @@ void PortJISR(void){
 	Counters.callsToUISRs++;
 }
 
-/* Port H interrupt service routine */
+
+/** @brief Port H pins ISR
+ *
+ * Interrupt handler for edge events on port H pins. Not currently used.
+ *
+ * @author Fred Cooke
+ */
 void PortHISR(void)
 {
 //	// read the interrupt flags to a variable
@@ -153,7 +192,13 @@ void PortHISR(void)
 //	}
 }
 
-/* IRQ/PE1 interrupt service routine */
+
+/** @brief IRQ/PE1 pin ISR
+ *
+ * Interrupt handler for edge events on the IRQ/PE1 pin. Not currently used.
+ *
+ * @author Fred Cooke
+ */
 void IRQISR(void){
 	/* Clear the flag */
 	// ?? TODO
@@ -162,7 +207,13 @@ void IRQISR(void){
 	Counters.callsToUISRs++;
 }
 
-/* XIRQ/PE0 interrupt service routine */
+
+/** @brief XIRQ/PE0 pin ISR
+ *
+ * Interrupt handler for edge events on the XIRQ/PE0 pin. Not currently used.
+ *
+ * @author Fred Cooke
+ */
 void XIRQISR(void){
 	/* Clear the flag */
 	// ?? TODO
@@ -171,7 +222,13 @@ void XIRQISR(void){
 	Counters.callsToUISRs++;
 }
 
-/* Count how often our voltage goes too low without resetting */
+
+/** @brief Low Voltage Counter
+ *
+ * Count how often our voltage drops lower than it should without resetting.
+ *
+ * @author Fred Cooke
+ */
 void LowVoltageISR(void){
 	/* Clear the flag */
 	VREGCTRL |= 0x01;

@@ -1,6 +1,4 @@
-/*	globalConstants.h
-
-	Copyright 2008 Fred Cooke
+/*	Copyright 2008 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,16 +13,43 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/**	@file globalConstants.h
+ * @ingroup allHeaders
+ * @ingroup globalHeaders
+ *
+ * @brief Global constant declarations
+ *
+ * All global constants are declared in this file for use throughout the program.
+ *
+ * @author Fred Cooke
+ */
+
 
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
 #ifndef FILE_GLOBAL_CONSTANTS_H_SEEN
 #define FILE_GLOBAL_CONSTANTS_H_SEEN
+
+
+#ifdef EXTERN
+#warning "EXTERN already defined by another header, please sort it out!"
+#undef EXTERN /* If fail on warning is off, remove the definition such that we can redefine correctly. */
+#endif
+
+
+#ifdef GLOBAL_CONSTANTS_C
+#define EXTERN
+#else
+#define EXTERN extern
+#endif
 
 
 /* Types summary
@@ -51,18 +76,15 @@ EXTERN const volatile unsigned short CHTTransferTable[1024]; /* 2k */
 EXTERN const volatile unsigned short MAFTransferTable[1024]; /* 2k */
 EXTERN const volatile unsigned char TestTransferTable[2048]; /* 2k */
 
-EXTERN const unsigned short memdumplength;
-EXTERN const unsigned short maxBasicDatalogLength;
+/* Version strings */
+EXTERN const unsigned char interfaceVersionAndType[20];
+EXTERN const unsigned char firmwareVersion[45];
 
-/* Interface version field 8 bit number, 8 bit number, 8 bit number, string of arbitrary length */
-EXTERN const unsigned char interfaceVersionAndType[20]; /* Should be unique for serial comms */
-
-/* Firmware version string of arbitrary length for display and human ID purposes */
-EXTERN const unsigned char firmwareVersion[47]; /* Should change with even the slightest code change */
-
+/* Ignition */
 EXTERN const unsigned short dwellStartMasks[IGNITION_CHANNELS];
 EXTERN const unsigned short ignitionMasks[IGNITION_CHANNELS];
 
+/* Injection */
 EXTERN const unsigned char injectorMainOnMasks[INJECTION_CHANNELS];
 EXTERN const unsigned char injectorMainOffMasks[INJECTION_CHANNELS];
 EXTERN const unsigned char injectorMainEnableMasks[INJECTION_CHANNELS];
@@ -130,6 +152,12 @@ EXTERN const unsigned long masterFuelConstant;
 EXTERN const unsigned long MAFFuelConstant;
 
 
+/* Serial data log stuff, temporary */
+EXTERN const unsigned short memdumplength;
+EXTERN const unsigned short maxBasicDatalogLength;
+
+
+
 /* These need to be changed if the timer period is changed at all */
 /* The number of timer units it takes for the switch on scheduling code to run */
 EXTERN const unsigned short injectorSwitchOnCodeTime;
@@ -157,6 +185,10 @@ EXTERN const unsigned short leadingEdgePrimaryRPMInputCodeTime;
 EXTERN const unsigned short trailingEdgePrimaryRPMInputCodeTime;
 EXTERN const unsigned short leadingEdgeSecondaryRPMInputCodeTime;
 EXTERN const unsigned short trailingEdgeSecondaryRPMInputCodeTime;
+
+
+#undef EXTERN
+
 
 #else
 	/* let us know if we are being untidy with headers */

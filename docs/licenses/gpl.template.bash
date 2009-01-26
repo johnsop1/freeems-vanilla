@@ -1,6 +1,6 @@
 #	filename here
 #
-#	Copyright 2008 Fred Cooke
+#	Copyright 2009 Fred Cooke
 #
 #	This file is part of the FreeEMS project.
 #
@@ -15,9 +15,10 @@
 #	GNU General Public License for more details.
 #
 #	You should have received a copy of the GNU General Public License
-#	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+#	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 #
-#	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+#	We ask that if you make any changes to this file you email them upstream to
+#	us at admin(at)diyefi(dot)org or, even better, fork it on www.github.com!!!
 #
 #	Thank you for choosing FreeEMS to run your engine!
 

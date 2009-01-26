@@ -1,4 +1,4 @@
-/*	commsCore.h
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,19 +15,36 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/** @file commsCore.h
+ * @ingroup allHeaders
+ */
+
 
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
 #ifndef FILE_COMMS_CORE_H_SEEN
 #define FILE_COMMS_CORE_H_SEEN
 
+
+#ifdef EXTERN
+#warning "EXTERN already defined by another header, please sort it out!"
+#undef EXTERN /* If fail on warning is off, remove the definition such that we can redefine correctly. */
+#endif
+
+
 #ifdef COMMSCORE_C
 #define EXTERN
+/* Internal use without check on buffer, purely here to place functions in paged memory. */
+void sendErrorInternal(unsigned short) FPAGE_FE;
+void sendDebugInternal(unsigned char*) FPAGE_FE;
 #else
 #define EXTERN extern
 #endif
@@ -215,6 +232,7 @@ EXTERN unsigned short	RXHeaderPayloadLength;
 
 
 #undef EXTERN
+
 
 #else
 	/* let us know if we are being untidy with headers */

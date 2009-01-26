@@ -17,7 +17,7 @@
 #       GNU General Public License for more details.
 #
 #       You should have received a copy of the GNU General Public License
-#       along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+#       along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 #
 #       We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
 #
@@ -28,5 +28,3 @@ hcs12mem -b 115200 -i sm -p /dev/ttyUSB0 -t mc9s12xdp512 -a banked-ppage -e --fl
 
 #hcs12mem -b 115200 -i sm -p /dev/ttyUSB0 -t mc9s12xdp512 -a non-banked -e --flash-read zoutput/freeems.full.dump.48k.s19
 #hcs12mem -b 115200 -i sm -p /dev/ttyUSB0 -t mc9s12xdp512 -a banked-linear -e --flash-read zoutput/freeems.full.dump.linear.s19
-
-

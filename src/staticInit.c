@@ -1,4 +1,4 @@
-/*	staticInit.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,14 +15,29 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
 
+/** @file staticInit.c
+ *
+ * This file contains static initialisations for fields that require a non-zero
+ * initial value after reset. Zero fields are taken care of by GCC and doing
+ * this here means less init time and init code, both good things. Variables
+ * initialised here are placed together by the compiler in flash and copied up
+ * to RAM as a linear block before the main method runs. This is significantly
+ * more efficient than doing them one-by-one in an init routine.
+ *
+ * @author Fred Cooke
+ */
+
+
 #include "inc/freeEMS.h"
+
 
 //unsigned char asyncDatalogType = asyncDatalogBasic;
 unsigned char asyncDatalogType = asyncDatalogBasic;

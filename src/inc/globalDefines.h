@@ -1,6 +1,4 @@
-/*	globalDefines.h
-
-	Copyright 2008 Fred Cooke
+/*	Copyright 2008 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,11 +13,28 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/**	@file globalDefines.h
+ * @ingroup allHeaders
+ * @ingroup globalHeaders
+ *
+ * @brief Global hash define literal replacements
+ *
+ * Currently this holds most hash defined constants and literals.
+ *
+ * @author Fred Cooke
+ *
+ * @todo TODO Some investigation as to whether it is best to use consts or defines is required
+ * @todo TODO Break this up into smaller chunks that are included into this file
+ */
+
 
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
@@ -178,19 +193,26 @@
 #define AFR1020LambdaMax			49152		/* Lambda read at highest ADC reading */
 #define AFR1020LambdaRange			32768		/* Lambda difference between lowest and highest ADC reading */
 
+
 /* MAP Sensor Data Explanation
  *
- *  Motorola/Freescale pressure sensor data obtained from the
+ * Motorola/Freescale pressure sensor data obtained from the
  * data sheets by extrapolation of the "typical" line to the
- * borders of the transfer function chart.
+ * borders of the transfer function chart. This gives us the
+ * correct values in the middle despite not being able to
+ * reach the ends of the scale.
  *
  * By min and max I mean the OV and 5V pressures that aren't
  * attainable, but that give the correct function in between.
  */
+
+
+/* www.freescale.com/files/sensors/doc/data_sheet/MPX4100A.pdf */
 #define MPX4100AMin				1400		/* Pressure read at lowest ADC reading */
 #define MPX4100AMax				10750		/* Pressure read at highest ADC reading */
 #define MPX4100ARange			9350		/* Pressure difference between lowest and highest ADC readings */
 
+/* www.freescale.com/files/sensors/doc/data_sheet/MPX4250A.pdf */
 #define MPX4250AMin				800			/* Pressure read at lowest ADC reading */
 #define MPX4250AMax				26000		/* Pressure read at highest ADC reading */
 #define MPX4250ARange			25200		/* Pressure difference between lowest and highest ADC readings */
@@ -224,9 +246,7 @@
 //#define densityOfFuelUnitDivisor 1000
 #define densityOfFuelTotalDivisor 32000
 
-#define userTextFieldArrayLength1 966			/* Arbitrary field length to avoid wasting excess space on flash */
-#define userTextFieldArrayLength2 1004			/* Arbitrary field length to avoid wasting excess space on flash */
-#define baudDivisor115p2 22					/* (40MHz / (16*115.2kHz)) = 21.7013889 */
+#define divisorFor115200bps 22					/* (40MHz / (16*115.2kHz)) = 21.7013889 */
 /* http://www.google.com/search?hl=en&safe=off&q=22%2F%28%2840000000%2F16%29%2F115200%29&btnG=Search 1.376% error in speed */
 /* http://www.google.com/search?hl=en&safe=off&q=40MHz%2F%2816*22%29&btnG=Search 113.636 kHz */
 
@@ -241,15 +261,6 @@
 #define DWELL_DISABLE NBIT0
 #define IGNITION_ENABLE BIT1
 #define IGNITION_DISABLE NBIT1
-
-/* Variable banks for taking readings while performing calculations without corruption or blocking ISRs */
-#define IN_OUT_BANKS 2
-
-/* Hold two copies of all ADC readings such that one can be used while the other is being recorded. */
-#define ADC_ARRAY_COUNT 16 // no point doing the other 8 (24) because they can't be used on this core at this time.
-#define ADCS_IN_ADC0 8
-#define ADCS_IN_ADC1 8 /* Should be 16, but code will need a slight refactor to take care of that anyway */
-#define ADC_BLOCK_LENGTH 64 /* ADC_ARRAY_COUNT * IN_OUT_BANKS * 2 = 16 * 2 * 2 */ /* times 2 because they are shorts and 2 bytes each */
 
 /* Valid RPAGE values :
  *	0xFF - linear

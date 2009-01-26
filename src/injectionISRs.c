@@ -1,4 +1,4 @@
-/*	injectionISRs.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,16 +15,35 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/**	@file injectionISRs.c
+ * @ingroup interruptHandlers
+ *
+ * @brief Injection ISR substitutions
+ *
+ * This file defines the pin specific names for each interrupt and all of it's
+ * pin specific variables then imports the actual code from inc/injectorISR.c
+ * for each pin such that each one is unique and references a separate set of
+ * values specific to it while only maintaining a single copy of the code.
+ *
+ * @see injectorISR.c
+ *
+ * @author Fred Cooke
+ */
+
 
 #define INJECTIONISRS_C
 #include "inc/freeEMS.h"
 #include "inc/interrupts.h"
 #include "inc/injectionISRs.h"
+
 
 /* Staged control algorithms for PIT2 and PIT3 */
 /* Staged injection switch on timer */

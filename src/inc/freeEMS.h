@@ -1,6 +1,4 @@
-/*	freeEMS.h
-
-	Copyright 2008 Fred Cooke
+/*	Copyright 2008 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,11 +13,29 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/**	@file freeEMS.h
+ * @ingroup allHeaders
+ * @ingroup globalHeaders
+ *
+ * @brief The main project header file
+ *
+ * The central header for all source files to include. This pulls in the
+ * device header, all other shared headers, all global defines, all global
+ * constant declarations, all type definitions and all global variables. Other
+ * variables that are actually in global space but only shared between a few
+ * select files should be placed in the header for the main file that uses them.
+ *
+ * @author Fred Cooke
+ */
+
 
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
@@ -30,29 +46,39 @@
 /* Include top level files that everything else relies on */
 #include "memory.h"
 #include "9S12XDP512.h"
-
-
-/* Where extern is used instead of EXTERN it indicates that		*/
-/* the variable is initialised in staticInit.c, if someone		*/
-/* attempts to use extern and doesn't initialise the variable	*/
-/* statically then the linker should error on undefined symbol	*/
-#ifdef MAIN_OR_GLOBALS
-#define EXTERN
-#else
-#define EXTERN extern
-#endif
-
+#include "flashGlobals.h" /// @todo TODO For Sean to integrate back in
+///include "registerMasks.h @todo TODO we should define the register masks that we use in one place, but probably not in the main device header.
 
 /* Include define files at the top here as other includes use them */
 #include "errorDefines.h"
 #include "globalDefines.h"
 
+/* Include data types at the top as other includes use them */
+#include "structs.h" /// @todo TODO split this out into more chunks as it's too big.
+#include "FixedConfigs.h"
+#include "TunableConfigs.h"
 
-/* Include items that would normally be found in here */
-#include "structs.h"
-#include "tunables.h"
+/* Global constant declarations */
 #include "globalConstants.h"
-#include "flashGlobals.h" // For Sean to work on this in parallel with me
+
+
+/* Where extern is used instead of EXTERN it indicates that   	*/
+/* the variable is initialised in staticInit.c, if someone    	*/
+/* attempts to use extern and doesn't initialise the variable 	*/
+/* statically then the linker should error on undefined symbol	*/
+
+
+#ifdef EXTERN
+#warning "EXTERN already defined by another header, please sort it out!"
+#undef EXTERN /* If fail on warning is off, remove the definition such that we can redefine correctly. */
+#endif
+
+
+#ifdef FREEEMS_C
+#define EXTERN
+#else
+#define EXTERN extern
+#endif
 
 
 /* Types summary
@@ -79,7 +105,7 @@ EXTERN unsigned short RPM1; // to be replaced with logging scheme for teeth.
 extern unsigned short tachoPeriod;
 EXTERN unsigned char portHDebounce;
 
-/* these should not be here... TODO */
+// these should not be here... TODO move to a comms header
 extern unsigned char asyncDatalogType;
 #define asyncDatalogOff			0x00
 #define asyncDatalogBasic		0x01
@@ -103,7 +129,9 @@ EXTERN RuntimeVar RuntimeVars;			/* Execution times for various blocks of code *
 EXTERN ISRLatencyVar ISRLatencyVars;	/* Delay in execution start for various blocks of code */
 
 
-/* The banked running variable system and structure
+/** @page bankedRunningVariables Banked Running Variables
+ *
+ * This page is to document and explain the operation of the banked running variable system and structure.
  *
  * The program running variables are divided into three broad groups: inputs, working
  * and outputs. For both the input and output groups there are two copies of each set
@@ -134,23 +162,23 @@ EXTERN ISRLatencyVar ISRLatencyVars;	/* Delay in execution start for various blo
  * tracking and is well worth the extra memory expense and complication.
  */
 
-EXTERN CoreVar* CoreVars;			/* Pointer to the core running variables */
-EXTERN CoreVar CoreVars0;			/* Bank 0 core running variables */
+EXTERN CoreVar* CoreVars;			/** Pointer to the core running variables */
+EXTERN CoreVar CoreVars0;			/** Bank 0 core running variables */
 /* If we move to xgate or isr driven logging, add bank 1 back in */
 
-EXTERN DerivedVar* DerivedVars;		/* Pointer to the secondary running variables */
-EXTERN DerivedVar DerivedVars0;		/* Bank 0 secondary running variables */
+EXTERN DerivedVar* DerivedVars;		/** Pointer to the secondary running variables */
+EXTERN DerivedVar DerivedVars0;		/** Bank 0 secondary running variables */
 /* If we move to xgate or isr driven logging, add bank 1 back in */
 
-EXTERN ADCArray* ADCArrays;		/* main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
-EXTERN ADCArray* ADCArraysRecord;		/* main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
-EXTERN ADCArray ADCArrays0;		/* main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
-EXTERN ADCArray ADCArrays1;		/* main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
+EXTERN ADCArray* ADCArrays;			/** main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
+EXTERN ADCArray* ADCArraysRecord;	/** main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
+EXTERN ADCArray ADCArrays0;			/** main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
+EXTERN ADCArray ADCArrays1;			/** main adc storage area for syncronous sampling in the engine position ISR or injection ISR or ignition ISR etc. */
 
-EXTERN ADCArray* asyncADCArrays;	/* secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
-EXTERN ADCArray* asyncADCArraysRecord;	/* secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
-EXTERN ADCArray asyncADCArrays0;	/* secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
-EXTERN ADCArray asyncADCArrays1;	/* secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
+EXTERN ADCArray* asyncADCArrays;		/** secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
+EXTERN ADCArray* asyncADCArraysRecord;	/** secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
+EXTERN ADCArray asyncADCArrays0;		/** secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
+EXTERN ADCArray asyncADCArrays1;		/** secondary adc storage area for asynchronously sampling in the RTC/RTI ISR */
 
 EXTERN unsigned short* mathSampleTimeStamp; // TODO temp, remove
 EXTERN unsigned short* mathSampleTimeStampRecord; // TODO temp, remove
@@ -179,7 +207,7 @@ see line 80 or so from inc/injectorISR.c for array of pointer use. the above may
 
 
 
-/* Unions for paged large table access using RPAGE */
+/* TODO explanation of paged ram operation Unions for paged large table access using RPAGE */
 typedef union {
 	mainTable VETableMain;
 	mainTable IgnitionAdvanceTableMain;
@@ -218,41 +246,6 @@ EXTERN Tables4 TablesD RWINDOW;
 EXTERN unsigned char currentFuelRPage;
 EXTERN unsigned char currentTuneRPage;
 EXTERN unsigned char currentTimeRPage;
-
-/* Fueling blocks */
-EXTERN void* VETableMainFlashLocation;
-EXTERN void* VETableMainFlash2Location;
-EXTERN void* VETableSecondaryFlashLocation;
-EXTERN void* VETableSecondaryFlash2Location;
-EXTERN void* VETableTertiaryFlashLocation;
-EXTERN void* VETableTertiaryFlash2Location;
-EXTERN void* LambdaTableFlashLocation;
-EXTERN void* LambdaTableFlash2Location;
-/* Timing blocks */
-EXTERN void* IgnitionAdvanceTableMainFlashLocation;
-EXTERN void* IgnitionAdvanceTableMainFlash2Location;
-EXTERN void* IgnitionAdvanceTableSecondaryFlashLocation;
-EXTERN void* IgnitionAdvanceTableSecondaryFlash2Location;
-EXTERN void* InjectionAdvanceTableMainFlashLocation;
-EXTERN void* InjectionAdvanceTableMainFlash2Location;
-EXTERN void* InjectionAdvanceTableSecondaryFlashLocation;
-EXTERN void* InjectionAdvanceTableSecondaryFlash2Location;
-/* Tuable blocks */
-EXTERN void* SmallTablesAFlashLocation;
-EXTERN void* SmallTablesAFlash2Location;
-EXTERN void* SmallTablesBFlashLocation;
-EXTERN void* SmallTablesBFlash2Location;
-EXTERN void* SmallTablesCFlashLocation;
-EXTERN void* SmallTablesCFlash2Location;
-EXTERN void* SmallTablesDFlashLocation;
-EXTERN void* SmallTablesDFlash2Location;
-/* Flash ONLY blocks */
-EXTERN void* IATTransferTableLocation;
-EXTERN void* CHTTransferTableLocation;
-EXTERN void* MAFTransferTableLocation;
-EXTERN void* TestTransferTableLocation;
-/* Small tables */
-//EXTERN void*
 
 
 //union { /* Declare Union http://www.esacademy.com/faq/docs/cpointers/structures.htm */
@@ -309,6 +302,7 @@ EXTERN unsigned short bootTimeAAP; /* TODO populate this at switch on time depen
 
 /* ALL STATUS STUFF HERE */
 
+// TODO these flags are used for coreSettingsA and it is not clear that they are dual purpose, fix this...
 /* State variables : 0 = false (don't forget to change the init mask to suit!) */
 EXTERN unsigned short coreStatusA;	/* Each bit represents the state of some core parameter, masks below */
 /* Bit masks for coreStatusA */ // TODO needs a rename as does coresetingsA
@@ -329,7 +323,7 @@ EXTERN unsigned short coreStatusA;	/* Each bit represents the state of some core
 #define COREA15			BIT15_16	/* 15 */
 #define COREA16			BIT16_16	/* 16 */
 
-#define CLEAR_PRIMARY_SYNC	NBIT2_16	/**/
+#define CLEAR_PRIMARY_SYNC	NBIT2_16	/* */
 #define STAGED_NOT_REQUIRED	NBIT9_16	/*  9 Do not fire the staged injectors */
 #define CLEAR_CALC_FUEL_IGN	NBIT10_16	/* 10 Fuel and ignition don't require calculation */
 #define CLEAR_FORCE_READING	NBIT11_16	/* 11 Clear flag to force ADC sampling at low rpm/stall */
@@ -410,8 +404,9 @@ EXTERN unsigned short injectorStagedPulseWidths1[INJECTION_CHANNELS];
 /* Channel latencies (init not required) */
 EXTERN unsigned short injectorCodeLatencies[INJECTION_CHANNELS];
 
-#undef IN_OUT_BANKS
+
 #undef EXTERN
+
 
 #else
 	/* let us know if we are being untidy with headers */

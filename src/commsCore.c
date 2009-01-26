@@ -1,4 +1,4 @@
-/*	commsCore.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,11 +15,30 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/**	@file commsCore.c
+ * @ingroup communicationsFiles
+ *
+ * @brief Core communications functions.
+ *
+ * This file contains most of the core comms functionality. Currently that is
+ * only for UART serial style communication. It is already too big and needs
+ * to be split up somewhat. This will happen fairly soon during the serial
+ * refactoring and protocol fine tuning.
+ *
+ * @todo TODO function to setup a packet and send it fn(populateBodyFunctionPointer(), header, other, fields, here, and, use, or, not, within){}
+ * @todo TODO factor many things into functions and move the receive delegator to its own file
+ *
+ * @author Fred Cooke
+ */
+
 
 #define COMMSCORE_C
 #include "inc/freeEMS.h"
@@ -32,12 +51,15 @@
 #include <string.h>
 
 
-/* Internal use without check on buffer */
-void sendErrorInternal(unsigned short) FPAGE_FE;
-void sendDebugInternal(unsigned char*) FPAGE_FE;
-
-
-/* If changing this, update the max constant */
+/** @brief Populate a basic datalog packet
+ *
+ * Copies various chunks of data to the transmission buffer and truncates to
+ * the configured length. If changing this, update the maxBasicDatalogLength.
+ *
+ * @author Fred Cooke
+ *
+ * @warning This function is only a skeleton at this time.
+ */
 void populateBasicDatalog(){
 	/* Save the current position */
 	unsigned char* position = TXBufferCurrentPositionHandler;
@@ -57,38 +79,31 @@ void populateBasicDatalog(){
 }
 
 
-// TODO function to setup a packet and send it fn(populateBodyFunctionPointer(), header, other, fields, here, and, use, or, not, within){}
-
-// TODO rip dictionary out to own file
-
-// TODO factor many things into functions and move the receive delegator to its own file
-
-
 //void populateLogicAnalyser(){
 //	// get portT rpm input and inj main
 //	// get portB ign
 //	// get portA ign
 //	// get portK inj staged
 //}
+
+
+// All of these require some range checking, eg only some registers, and all ram, not flash, not other regs
+// TODO pointer for one byte
+// TODO pointer for one short
+// TODO function to log generic memory region by location and size ? requires length!
+// Ranges are :
+// ram window
+// bss/data region
+// IO registers etc that can't be altered simply by reading from.
+// NOT :
+// flash makes no sense
+// some regs are sensitive
+// some ram is unused
+// serial buffers make no sense
+// eeprom makes no sense
 //
-//
-//// All of these require some range checking, eg only some registers, and all ram, not flash, not other regs
-//// TODO pointer for one byte
-//// TODO pointer for one short
-//// TODO function to log generic memory region by location and size ? requires length!
-//// Ranges are :
-//// ram window
-//// bss/data region
-//// IO registers etc that can't be altered simply by reading from.
-//// NOT :
-//// flash makes no sense
-//// some regs are sensitive
-//// some ram is unused
-//// serial buffers make no sense
-//// eeprom makes no sense
-////
-//// 2k of regs max - user beware for now
-//// 12k of ram max
+// 2k of regs max - user beware for now
+// 12k of ram max
 //
 //init :
 //logaddr = fixed.addr
@@ -107,18 +122,27 @@ void populateBasicDatalog(){
 //
 //run check at init and set time, not run time or just not check?? maybe its silly to check at all
 //
-///* Just dump the ADC channels as fast as possible */
+// /* Just dump the ADC channels as fast as possible */
 //void populateScopeLogADCAll(){
 //	sampleBlockADC(TXBufferCurrentPositionHandler);
 //	TXBufferCurrentPositionHandler += sizeof(ADCArray);
 //}
 
 
-// TODO Look at the time stamps and where to write them, also whether to function
-// TODO call these simple blocks or write one function that handles all the logic.
+// what does this mean >> ??? TODO Look at the time stamps and where to write them, also whether to function call these simple blocks or write one function that handles all the logic.
 
 
-/* Checksum and initiate send process */
+/** @brief Checksum a packet and send it
+ *
+ * This functions job is to finalise the main loop part of the packet sending
+ * process. It runs a checksum over the packet data and tags it to the end
+ * before configuring the various ISRs that need to send the data out.
+ *
+ * @author Fred Cooke
+ *
+ * @bug http://freeems.aaronb.info/tracker/view.php?id=81
+ * @todo TODO fix the double/none start byte bug and remove the hack!
+ */
 void checksumAndSend(){
 	/* Get the length from the pointer */
 	unsigned short TXPacketLengthToSend = (unsigned short)TXBufferCurrentPositionHandler - (unsigned short)&TXBuffer;
@@ -143,9 +167,7 @@ void checksumAndSend(){
 		/* Initiate transmission */
 		SCI0DRL = START_BYTE;
 		while(!(SCI0SR1 & 0x80)){/* Wait for ever until able to send then move on */}
-		SCI0DRL = START_BYTE; // TODO nasty hack that works... means at least one and most 2 starts are sent so stuff works, but is messy... must be a better way.
-
-		// TODO http://freeems.aaronb.info/tracker/view.php?id=81
+		SCI0DRL = START_BYTE; // nasty hack that works... means at least one and most 2 starts are sent so stuff works, but is messy... there must be a better way.
 
 		/* Note : Order Is Important! */
 		/* TX empty flag is already set, so we must clear it by writing out before enabling the interrupt */
@@ -189,10 +211,14 @@ void checksumAndSend(){
 }
 
 
-// hHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
-// above this to another file
-
-
+/** @brief Decode a packet and respond
+ *
+ * This is the core function that controls what functionality is run when a
+ * packet is received in full by the ISR code and control is passed back to the
+ * main loop code. The vast majority of communications action happens here.
+ *
+ * @author Fred Cooke
+ */
 void decodePacketAndRespond(){
 	/* Extract and build up the header fields */
 	RXBufferCurrentPosition = (unsigned char*)&RXBuffer;
@@ -238,7 +264,7 @@ void decodePacketAndRespond(){
 	/* If the header has addresses, check them and if OK copy them */
 	if(RXHeaderFlags & HEADER_HAS_ADDRS){
 		/* Check the destination address against our address */
-		if(*RXBufferCurrentPosition != fixedConfigs2.networkAddress){
+		if(*RXBufferCurrentPosition != fixedConfigs1.serialSettings.networkAddress){
 			/* Addresses do not match, discard packet without error */
 			resetReceiveState(CLEAR_ALL_SOURCE_ID_FLAGS);
 			TXBufferInUseFlags = 0;
@@ -254,7 +280,7 @@ void decodePacketAndRespond(){
 			resetReceiveState(CLEAR_ALL_SOURCE_ID_FLAGS);
 			return;
 		}
-		if(RXHeaderSourceAddress == fixedConfigs2.networkAddress){
+		if(RXHeaderSourceAddress == fixedConfigs1.serialSettings.networkAddress){
 			sendErrorInternal(sourceAddressIsDuplicate);
 			resetReceiveState(CLEAR_ALL_SOURCE_ID_FLAGS);
 			return;
@@ -266,7 +292,7 @@ void decodePacketAndRespond(){
 		*TXBufferCurrentPositionHandler = RXHeaderSourceAddress;
 		TXBufferCurrentPositionHandler++;
 		/* TX source = our address */
-		*TXBufferCurrentPositionHandler = fixedConfigs2.networkAddress;
+		*TXBufferCurrentPositionHandler = fixedConfigs1.serialSettings.networkAddress;
 		TXBufferCurrentPositionHandler++;
 		/* Decrement for both at once to save a cycle */
 		RXCalculatedPayloadLength -= 2;
@@ -299,6 +325,7 @@ void decodePacketAndRespond(){
 
 		switch (RXHeaderPayloadID){
 		case requestInterfaceVersion:
+		{
 			if(RXCalculatedPayloadLength != 0){
 				sendErrorInternal(payloadLengthTypeMismatch);
 				break;
@@ -313,7 +340,9 @@ void decodePacketAndRespond(){
 			TXBufferCurrentPositionHandler += sizeof(interfaceVersionAndType);
 			checksumAndSend();
 			break;
+		}
 		case requestFirmwareVersion:
+		{
 			if(RXCalculatedPayloadLength != 0){
 				sendErrorInternal(payloadLengthTypeMismatch);
 				break;
@@ -327,7 +356,9 @@ void decodePacketAndRespond(){
 			TXBufferCurrentPositionHandler += sizeof(firmwareVersion);
 			checksumAndSend();
 			break;
+		}
 		case requestMaxPacketSize:
+		{
 			if(RXCalculatedPayloadLength != 0){
 				sendErrorInternal(payloadLengthTypeMismatch);
 				break;
@@ -337,7 +368,9 @@ void decodePacketAndRespond(){
 			TXBufferCurrentPositionHandler += 2;
 			checksumAndSend();
 			break;
+		}
 		case requestEchoPacketReturn:
+		{
 			/* This type must have a length field, set that up */
 			*((unsigned short*)TXBufferCurrentPositionHandler) = RXPacketLengthReceived;
 			*TXHeaderFlags |= HEADER_HAS_LENGTH;
@@ -349,6 +382,7 @@ void decodePacketAndRespond(){
 			TXBufferCurrentPositionHandler += RXPacketLengthReceived;
 			checksumAndSend();
 			break;
+		}
 		case requestSoftSystemReset:
 		{
 			// hack to allow datalog on/off from the orange button (thank christ I asked for that button when I did)
@@ -380,6 +414,7 @@ void decodePacketAndRespond(){
 //			_start();
 		}
 		case requestHardSystemReset:
+		{
 			if(RXCalculatedPayloadLength != 0){
 				sendErrorInternal(payloadLengthTypeMismatch);
 				break;
@@ -390,12 +425,15 @@ void decodePacketAndRespond(){
 			ARMCOP = 0xFF; /* Write bad value, should cause immediate reset */
 			/* Using _start() only resets the app ignoring the monitor switch. It does not work */
 			/* properly because the location of _start is not the master reset vector location. */
+		}
 		default:
+		{
 			if((RXHeaderPayloadID % 2) == 1){
 				sendErrorInternal(invalidProtocolPayloadID);
 			}else{
 				sendErrorInternal(unrecognisedProtocolPayloadID);
 			}
+		}
 		}
 	}else{ /* Otherwise firmware payload types */
 		switch (RXHeaderPayloadID) {
@@ -420,13 +458,14 @@ void decodePacketAndRespond(){
 				break;
 			}
 
+			// TODO factor this out into validation delegation function once the number of types increases somewhat
 			unsigned short errorID = 0;
 			if(locationID < 16){
-				mainTable aTable;
-				errorID = validateMainTable(&aTable);
-			}else if(locationID > 399){
-				twoDTableUS aTable;
-				errorID = validateTwoDTable(&aTable);
+//				mainTable aTable;
+				errorID = validateMainTable((mainTable*)RXBufferCurrentPosition);
+			}else if((locationID > 399) && (locationID < 900)){
+//				twoDTableUS aTable;
+				errorID = validateTwoDTable((twoDTableUS*)RXBufferCurrentPosition);
 			}// TODO add other table types here
 			/* If the validation failed, report it */
 			if(errorID != 0){
@@ -467,36 +506,50 @@ void decodePacketAndRespond(){
 				break;
 			}
 
+			// TODO factor this out into validation delegation function once the number of types increases somewhat
+			unsigned short errorID = 0;
 			if(locationID < 16){
-				unsigned short errorID = validateMainTable((mainTable*)RXBufferCurrentPosition);
-				if(errorID != 0){
-					sendErrorInternal(errorID);
-					break;
-				}
-			}/* else{ hope for the best ;-) } */
-
-			/* Copy from the RX buffer to the block of flash */
-			unsigned short errorID = writeBlock(details.FlashPage, (unsigned short*)details.FlashAddress, RPAGE, (unsigned short*)RXBufferCurrentPosition, details.size);
-
-			/* If flash write failed for some reason */
+//				mainTable aTable;
+				errorID = validateMainTable((mainTable*)RXBufferCurrentPosition);
+			}else if((locationID > 399) && (locationID < 900)){
+//				twoDTableUS aTable;
+				errorID = validateTwoDTable((twoDTableUS*)RXBufferCurrentPosition);
+			}// TODO add other table types here
+			/* If the validation failed, report it */
 			if(errorID != 0){
 				sendErrorInternal(errorID);
 				break;
 			}
 
-			/* If present in ram, update that too */
-			if((details.RAMPage != 0) && (details.RAMAddress != 0)){
+			/* Calculate the position of the end of the stored packet for use as a buffer */
+			void* buffer = (void*)((unsigned short)&RXBuffer + RXPacketLengthReceived);
+
+			/* Swap the RAM details such that the block gets pulled down from the buffer */
+			unsigned char originalRAMPage = details.RAMPage;
+			void* originalRAMAddress = details.RAMAddress;
+			details.RAMPage = RPAGE;
+			details.RAMAddress = RXBufferCurrentPosition;
+
+			/* Copy from the RX buffer to the block of flash */
+			errorID = writeBlock(&details, buffer);
+			if(errorID != 0){
+				sendErrorInternal(errorID);
+				break;
+			}
+
+			/* If present in RAM, update that too */
+			if((originalRAMPage != 0) && (originalRAMAddress != 0)){
 				/* Save page values for restore */
 				unsigned char oldRamPage = RPAGE;
 				/* Set the viewable ram page */
-				RPAGE = details.RAMPage;
+				RPAGE = originalRAMPage;
 				/* Copy from the RX buffer to the block of ram */
-				memcpy(details.RAMAddress, RXBufferCurrentPosition, details.size);
+				memcpy(originalRAMAddress, RXBufferCurrentPosition, details.size);
 				/* Restore the original ram and flash pages */
 				RPAGE = oldRamPage;
 			}
 
-			sendAckIfRequired(); // TODO implement
+			sendAckIfRequired();
 			// TODO document errors can always be returned and add error check in to send as response for ack and async otherwise
 			break;
 		}
@@ -618,29 +671,18 @@ void decodePacketAndRespond(){
 				break;
 			}
 
-			if(details.size < 1024){
-				sendErrorInternal(0x0999);
-				/* create some sort of function to copy the flash sector up into
-				 * the serial rx buffer in the high end and then over write with
-				 * the small piece defined either from incoming data, or from its
-				 * memory location. Then just call burn in the normal way.
-				 *
-				 * function could take :
-				 * pointer to the buffer region (must be 1024 long or more)
-				 * rpage, address, length of data to be persisted
-				 * ppage, address of the sector to retrieve the rest of the data from
-				 * pointer to the details object we want to use for the following call :
-				 */
-			}
+			/* Calculate the position of the end of the stored packet for use as a buffer */
+			void* buffer = (void*)((unsigned short)&RXBuffer + RXPacketLengthReceived);
 
-			unsigned short errorID = writeBlock(details.RAMPage, (unsigned short*)details.RAMAddress, details.FlashPage, (unsigned short*)details.FlashAddress, details.size);
+			/* Write the block down from RAM to Flash */
+			unsigned short errorID = writeBlock(&details, buffer);
 
 			if(errorID != 0){
 				sendErrorInternal(errorID);
 				break;
 			}
 
-			sendDebugInternal("Copied RAM to Flash!");
+			sendAckIfRequired();
 			break;
 		}
 		case eraseAllBlocksFromFlash:
@@ -658,6 +700,7 @@ void decodePacketAndRespond(){
 			for(;page < 0xF8;page++){
 				unsigned short addr;
 				for(addr = start;addr < end; addr += inc){
+					// TODO create selfDestruct() function for loading larger code to the device using all flash pages.
 					eraseSector(page, (unsigned short*)addr);
 				}
 			}
@@ -935,11 +978,19 @@ void decodePacketAndRespond(){
 	PORTK |= BIT0;
 }
 
-//&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
-//below this to another file for now
-
-/* Wrapper for use outside the com handler */
+/** @brief Send an error if buffer free
+ *
+ * This is a wrapper for use outside the communication handler function. The error will only be sent if the buffer is empty and available, if not, it will be discarded.
+ *
+ * @author Fred Cooke
+ *
+ * @warning Use of this function signifies that the error you are trying to propagate is not urgent and can be forgotten.
+ *
+ * @note Consider not throwing an error if it seems appropriate to use this.
+ *
+ * @param errorID is the error ID to be passed out to listening devices.
+ */
 void sendErrorIfClear(unsigned short errorID){
 	if(!TXBufferInUseFlags){
 		TXBufferInUseFlags = ONES;
@@ -950,7 +1001,20 @@ void sendErrorIfClear(unsigned short errorID){
 }
 
 
-/* Wrapper for use outside the com handler */
+/** @brief Send an error even if we must wait
+ *
+ * This is a wrapper for use outside the communication handler function. This
+ * function will block until the error is able to be sent. This behaviour is
+ * not recommended as it will interfere with engine operation somewhat.
+ *
+ * @author Fred Cooke
+ *
+ * @warning Use of this function signifies that the error you are trying to propagate is extremely urgent and can not be forgotten.
+ *
+ * @note Using this function blocks other main loop code from execution. Consider handling the error in another way if it seems appropriate to use this.
+ *
+ * @param errorID is the error ID to be passed out to listening devices.
+ */
 void sendErrorBusyWait(unsigned short errorID){
 	while(TXBufferInUseFlags){} /* Wait till clear to send */
 	TXBufferInUseFlags = ONES;
@@ -958,9 +1022,25 @@ void sendErrorBusyWait(unsigned short errorID){
 }
 
 
-/* Send an error code out in a frequency limited way */
-void sendErrorInternal(unsigned short errorCode){ // TODO build wrapper to check for use inside handler or not and not send if busy and not in handler ditto for debug
-
+/** @brief Send an error
+ *
+ * This function is only for use inside the communication handling function.
+ * Use of it outside this environment is not supported and behaviour when used
+ * as such is undefined.
+ *
+ * @author Fred Cooke
+ *
+ * @warning ONLY use this function from within the communication handler.
+ *
+ * @see sendErrorIfClear()
+ * @see sendErrorBusyWait()
+ *
+ * @todo TODO clean up the mess of commented out crap in here!
+ * @todo TODO decide on errorCode or errorID and consistencise it everywhere.
+ *
+ * @param errorCode is the error ID to be passed out to listening devices.
+ */
+void sendErrorInternal(unsigned short errorCode){
 //	set buffer in use, consider blocking interrupts to do this cleanly
 
 
@@ -998,7 +1078,16 @@ void sendErrorInternal(unsigned short errorCode){ // TODO build wrapper to check
 }
 
 
-/* Wrapper for use outside the com handler */
+/** @brief Send a debug message if buffer free
+ *
+ * This is a wrapper for use outside the communication handler function. The debug message will only be sent if the buffer is empty and available, if not, it will be discarded.
+ *
+ * @author Fred Cooke
+ *
+ * @note This function exists as a convenience to developers, do not publish code that calls this function.
+ *
+ * @param message is a pointer to the null terminated debug message string.
+ */
 void sendDebugIfClear(unsigned char* message){
 	if(!TXBufferInUseFlags){
 		TXBufferInUseFlags = ONES;
@@ -1009,7 +1098,17 @@ void sendDebugIfClear(unsigned char* message){
 }
 
 
-/* Wrapper for use outside the com handler */
+/** Send a debug message even if we must wait
+ *
+ * This is a wrapper for use outside the communication handler function. This
+ * function will block until the debug message is able to be sent.
+ *
+ * @author Fred Cooke
+ *
+ * @note This function exists as a convenience to developers, do not publish code that calls this function.
+ *
+ * @param message is a pointer to the null terminated debug message string.
+ */
 void sendDebugBusyWait(unsigned char* message){
 	while(TXBufferInUseFlags){} /* Wait till clear to send */
 	TXBufferInUseFlags = ONES;
@@ -1017,7 +1116,23 @@ void sendDebugBusyWait(unsigned char* message){
 }
 
 
-/* Send a null terminated message out on the broadcast address */
+/** @brief Send a debug message
+ *
+ * Sends a null terminated debug message out on the broadcast address of all available interfaces.
+ *
+ * @author Fred Cooke
+ *
+ * @warning ONLY use this function from within the communication handler.
+ *
+ * @see sendDebugIfClear()
+ * @see sendDebugBusyWait()
+ *
+ * @note This function exists as a convenience to developers, do not publish code that calls this function.
+ *
+ * @todo TODO clean up the mess of commented out crap in here!
+ *
+ * @param message is a pointer to the null terminated debug message string.
+ */
 void sendDebugInternal(unsigned char* message){
 
 //	set buffer in use, consider blocking interrupts to do this cleanly
@@ -1130,7 +1245,14 @@ void sendDebugInternal(unsigned char* message){
 //}
 
 
-/* TODO when implementing, check that ppage is OK!!! */
+/** @brief Send an ack if required
+ *
+ * Currently only used to clear the TX buffer flags if we no longer need it.
+ *
+ * @author Fred Cooke
+ *
+ * @todo TODO when implementing, check that ppage is OK!!!
+ */
 void sendAckIfRequired(){
 	TXBufferInUseFlags = 0;
 	// check PPAGE while implementing TODO

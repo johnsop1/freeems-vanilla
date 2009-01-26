@@ -1,6 +1,4 @@
-/*	9S12XDP512.h
-
-	Copyright 2008 Fred Cooke
+/*	Copyright 2008, 2009 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,14 +13,28 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
-/* Full basic register definitions for the Freescale S912XDP512 processor */
-/* MC9S12XDP512V2.pdf Appendix G */
+
+/**	@file 9S12XDP512.h
+ * @ingroup allHeaders
+ * @ingroup globalHeaders
+ *
+ * @brief MC9S12XDP512 register definitions
+ *
+ * This is the device header for the FreeScale MC9S12XDP512 MCU. It contains
+ * declarations that allow access to all of the devices control registers.
+ *
+ * These are the full basic register definitions for the Freescale 9S12XDP512
+ * processor as taken from MC9S12XDP512V2.pdf Appendix G
+ *
+ * @author Fred Cooke
+ */
 
 
 /* see if we've seen this, if not, mark seen and process */
@@ -296,22 +308,27 @@
 
 
 /* Pulse accumulator control registers */
-//0x0068 ICPAR DVUCP() /*
-//0x0060 PACTL DVUCP() /*
-//0x0061 PAFLG DVUCP() /*
-//0x0070 PBCTL DVUCP() /*
-//0x0071 PBFLG DVUCP() /*
-// one short for each hi lo par based on hi address.
-/* Pulse accumulator registers */
-//0x0062 PACN3 (hi)
-//0x0063 PACN2 (lo)
-//0x0064 PACN1 (hi)
-//0x0065 PACN0 (lo)
-/* Pulse accumulator holding registers */
-//0x0072 PA3H DVUCP() /* hi?
-//0x0073 PA2H DVUCP() /* lo?
-//0x0074 PA1H DVUCP() /* hi?
-//0x0075 PA0H DVUCP() /* lo?
+#define ICPAR DVUCP(0x0068)
+/*	(PACTL) 7   6    5     4     3    2    1    0
+	 		  PAEN PAMOD PEDGE CLK1 CLK0 PAOVI PAI */
+#define PACTL DVUCP(0x0060)
+#define PAFLG DVUCP(0x0061)
+#define PBCTL DVUCP(0x0070)
+#define PBFLG DVUCP(0x0071)
+/* Pulse accumulator count registers dual access, 8 or 16 bit */
+#define PACNUS2 DVUSP(0x0062) /* 16 bit (0x0062 PACN3, 0x0063 PACN2) */
+#define PACNUS0 DVUSP(0x0064) /* 16 bit (0x0064 PACN1, 0x0065 PACN0) */
+#define PACN3 DVUCP(0x0062) /* high */
+#define PACN2 DVUCP(0x0063) /* low */
+#define PACN1 DVUCP(0x0064) /* high */
+#define PACN0 DVUCP(0x0065) /* low */
+/* Pulse accumulator holding registers dual access, 8 or 16 bit */
+#define PACHUS2 DVUSP(0x0072) /* 16 bit (0x0072 PACH3, 0x0073 PACH2) */
+#define PACHUS0 DVUSP(0x0074) /* 16 bit (0x0074 PACH1, 0x0075 PACH0) */
+#define PA3H DVUCP(0x0072) /* high */
+#define PA2H DVUCP(0x0073) /* low */
+#define PA1H DVUCP(0x0074) /* high */
+#define PA0H DVUCP(0x0075) /* low */
 
 
 /* Modulus down counter control registers */
@@ -986,6 +1003,7 @@
 #ifdef Reserved
 	#error "We have accidentally defined reserved as Reserved in here, find it and fix it."
 #endif
+
 
 #else
 	/* let us know if we are being untidy with headers */

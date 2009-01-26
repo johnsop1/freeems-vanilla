@@ -1,4 +1,4 @@
-/*	enginePositionISRs.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,20 +15,50 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
-#define ENGINEPOSITIONISRS_C
+
+/**	@file NipponDenso.c
+ * @ingroup interruptHandlers
+ * @ingroup enginePositionRPMDecoders
+ *
+ * @brief Reads Nippon Denso 24/2 sensors
+ *
+ * This file contains the two interrupt service routines for handling engine
+ * position and RPM signals from mainly Toyota engines using this sensor style.
+ *
+ * One ISR handles the 24 evenly spaced teeth and the other handles the two
+ * adjacent teeth. This signal style provides enough information for wasted
+ * spark ignition and semi sequential fuel injection.
+ *
+ * Supported engines include:
+ * - 4A-GE
+ * - 7A-FE
+ * - 3S-GE
+ * - 1UZ-FE
+ * - Mazda F2T
+ *
+ * @author Fred Cooke
+ *
+ * @note Pseudo code that does not compile with zero warnings and errors MUST be commented out.
+ *
+ * @todo TODO make this generic for evenly spaced teeth with a pulse per revolution from the second input.
+ */
+
+
 #include "inc/freeEMS.h"
 #include "inc/interrupts.h"
 #include "inc/utils.h"
-#include "inc/commsISRs.h"
-#include "inc/enginePositionISRs.h"
 
-/* TODO Summary of intended engine position capture scheme
+
+/** Primary RPM ISR
+ *
+ * Summary of intended engine position capture scheme (out of date as at 3/1/09)
  *
  * Position/RPM signal interpretation :
  * Discard edges that have arrived too soon (lose sync here?)
@@ -43,10 +73,14 @@
  * Grab a unified set of ADC readings at one time in a consistent crank location to eliminate engine cycle dependent noise.
  * Set flag stating that New pulse, advance, etc should be calculated.
  *
+ * @author Fred Cooke
+ *
+ * @warning These are for testing and demonstration only, not suitable for driving with just yet.
+ *
+ * @todo TODO bring the above docs up to date with reality
+ * @todo TODO finish this off to a usable standard
  */
-
-void PrimaryRPMISR(void)
-{
+void PrimaryRPMISR(){
 	/* Clear the interrupt flag for this input compare channel */
 	TFLG = 0x01;
 
@@ -238,7 +272,7 @@ void PrimaryRPMISR(void)
 
 					// increment queue length
 					dwellQueueLength++;
-				}else if(dwellQueueLength > fixedConfigs2.combustionEventsPerEngineCycle){ //TODO sensible figures here for array index OOBE
+				}else if(dwellQueueLength > fixedConfigs1.engineSettings.combustionEventsPerEngineCycle){ //TODO sensible figures here for array index OOBE
 					// do nothing, or increment a counter or something similar.
 				}else{
 					unsigned short sumOfDwells = PITLD0;
@@ -292,7 +326,7 @@ void PrimaryRPMISR(void)
 
 					// increment to 1
 					ignitionQueueLength++;
-				}else if(ignitionQueueLength > fixedConfigs2.combustionEventsPerEngineCycle){ //TODO sensible figures here for array index OOBE
+				}else if(ignitionQueueLength > fixedConfigs1.engineSettings.combustionEventsPerEngineCycle){ //TODO sensible figures here for array index OOBE
 					// do nothing, or increment a counter or something similar.
 				}else{
 					unsigned short sumOfIgnitions = PITLD1;
@@ -332,8 +366,15 @@ void PrimaryRPMISR(void)
 	// schedule fuel and ign based on spark cut and fuel cut and timing vars and status vars config vars
 }
 
-void SecondaryRPMISR(void)
-{
+
+/** Secondary RPM ISR
+ *
+ * Similar to the primary one.
+ *
+ * @todo TODO bring this documentation up to date.
+ * @todo TODO finish this off to a usable standard.
+ */
+void SecondaryRPMISR(){
 	/* Clear the interrupt flag for this input compare channel */
 	TFLG = 0x02;
 

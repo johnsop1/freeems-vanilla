@@ -1,6 +1,4 @@
-/*	errorDefines.h
-
-	Copyright 2008 Fred Cooke
+/*	Copyright 2008 Fred Cooke
 
 	This file is part of the FreeEMS project.
 
@@ -15,11 +13,27 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
+
+
+/**	@file errorDefines.h
+ * @ingroup allHeaders
+ * @ingroup globalHeaders
+ *
+ * @brief Error ID hash defines
+ *
+ * This file contains all error codes for propagation up and out to a PC.
+ * When adding new codes, ensure that they are unique and also that you
+ * group them appropriately in ranges for easy visual identification.
+ *
+ * @author Fred Cooke
+ */
+
 
 /* Header file multiple inclusion protection courtesy eclipse Header Template	*/
 /* and http://gcc.gnu.org/onlinedocs/gcc-3.1.1/cpp/ C pre processor manual		*/
@@ -27,7 +41,7 @@
 #define FILE_ERRORDEFINES_H_SEEN
 
 
-/* TODO Introduce some structure to the numbering such that they can be interpreted somewhat without a chart */
+/** @todo TODO Introduce some structure to the numbering such that they can be interpreted somewhat without a chart */
 
 
 /* Unconfigured options */
@@ -55,13 +69,14 @@
 
 /* Flash burning error codes */
 #define sizeNotMultipleOfSectorSize		0x3000
-#define addressNotSectorAligned			0x3001
-#define addressNotWordAligned			0x3002
-#define addressNotFlashRegion			0x3003
-#define flashEraseFailed				0x3004
-#define flashAccessError				0x3005
-#define flashProtectionError			0x3006
-
+#define sizeOfBlockToBurnIsZero			0x3001
+#define smallBlockCrossesSectorBoundary	0x3002
+#define addressNotSectorAligned			0x3003
+#define addressNotWordAligned			0x3004
+#define addressNotFlashRegion			0x3005
+#define flashEraseFailed				0x3006
+#define flashAccessError				0x3007
+#define flashProtectionError			0x3008
 
 
 /* Communications error codes */
@@ -80,6 +95,7 @@
 #define invalidIDForTwoDTableAction		0x400C
 #define noSuchAsyncDatalogType			0x400D
 #define datalogLengthExceedsMax			0x400E
+#define locationIDNotFound				0x400F
 
 #define invalidAxisOrder				0
 #define invalidAxisIndex				1

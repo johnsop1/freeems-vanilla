@@ -1,4 +1,4 @@
-/*	interrupts.c
+/*	FreeEMS - the open source engine management system
 
 	Copyright 2008 Fred Cooke
 
@@ -15,20 +15,35 @@
 	GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
-	along with any FreeEMS software.  If not, see <http://www.gnu.org/licenses/>.
+	along with any FreeEMS software.  If not, see http://www.gnu.org/licenses/
 
-	We ask that if you make any changes to this file you send them upstream to us at admin@diyefi.org
+	We ask that if you make any changes to this file you email them upstream to
+	us at admin(at)diyefi(dot)org or, even better, fork the code on github.com!
 
 	Thank you for choosing FreeEMS to run your engine! */
 
+
+/**	@file interrupts.c
+ * @ingroup interruptHandlers
+ *
+ * @brief Interrupt Vector Table
+ *
+ * This file contains the definition of the interrupt vector table. This
+ * table consists only of pointers to void(void) functions that will be
+ * called by the hardware when an interrupt of a certain type occurs.
+ *
+ * @author Fred Cooke
+ */
+
+
 #include "inc/freeEMS.h"
 #include "inc/interrupts.h"
+
 
 /* Correctly placed in memory due to compiler/linker directives in memory.x and the linker script.	*/
 /* This is the FULL table of length 0xFF starting at 0xFF00 and ending at 0xFFFF, redirected with	*/
 /* jumps to the offset location by the serial monitor starting at 0xF700 and ending at 0xF800		*/
 /* http://m68hc11.serveftp.org/wiki/index.php/FAQ:Interrupts										*/
-
 const interruptTable _vectors[] VECTORS = {
 /* 0xFF00 to 0xFF0F */
 /*	The first row are NOT actually interrupts at all, just a wasted 16 bytes for tidiness */
